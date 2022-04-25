@@ -1,0 +1,17 @@
+        <div id="blacklist">
+            <h1>black list</h1>
+            <nav>
+                <ul class="list">
+                    {% for doc in blacklist %}
+                    <li>
+                        <div class="card">
+                            <p>Name: <b>{{doc["name"]}} </b></p>
+                            <p>ID: <b>{{doc["stud_id"]}}</b></p>
+                            <p>Number of Doses: <b>{{doc["numberOfDoses"]}}</b></p>
+
+                        </div>
+                    </li>
+                    {%endfor%}
+                </ul>
+            </nav>
+        </div>

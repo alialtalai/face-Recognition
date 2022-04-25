@@ -1,21 +1,24 @@
 ﻿from crypt import methods
 import urllib.request
-from flask import Flask, jsonify, render_template, Response 
+from flask import Flask, jsonify, render_template, Response
 import cv2
 import os
 import glob
 import face_recognition
 from PIL import ImageOps
+
+
+
+
 # Initialize the Flask app
 from firebase import firebase
 
-
 app = Flask(__name__)
 
-studentID=''
-studentName=''
-noDoses=0
-allowed='Unknown'
+studentID = ''
+studentName = ''
+noDoses = 0
+allowed = 'Unknown'
 
 ####
 
@@ -24,7 +27,9 @@ data = fireDB.getStudentInfo()
 userinfo = {}
 blacklist = fireDB.getBlackList()
 
-print('my black {0}'.format(blacklist))
+
+
+
 def getStudentData():
     if studentID != 'unknown':
         global studentName
@@ -32,16 +37,17 @@ def getStudentData():
         global allowed
         global userinfo
         for doc in data:
-            if doc.id==studentID:
-                  userinfo = doc.to_dict()
-             
+            if doc.id == studentID:
+                userinfo = doc.to_dict()
 
         studentName = userinfo['name']
-        noDoses=userinfo['numberOfDoses']
-        if noDoses>=2:
-            allowed='Yes'
+        noDoses = userinfo['numberOfDoses']
+        if noDoses >= 2:
+            allowed = 'Yes'
         else:
-            allowed='No'
+            allowed = 'No'
+
+
 # imagesUrl = userinfo['images']
 # i = 0
 # for item in imagesUrl:
@@ -80,22 +86,24 @@ for name in os.listdir(registered_faces_path):
         except IndexError as e:
             print(e)
 
+
 ###
 
 def gen_frames():
     while True:
         success, frame = camera.read()  # read the camera frame
+
         if not success:
             break
         else:
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             faces = face_recognition.face_locations(frame_rgb)
             # top,right,bottm,left
-            cloneStudentID=''
+            cloneStudentID = ''
             global allowed
             for face in faces:
                 top, right, bottom, left = face
-              
+
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
                 encoding = face_recognition.face_encodings(frame_rgb, [face])[0]
 
@@ -108,25 +116,24 @@ def gen_frames():
                     global studentID
                     studentID = known_names[results.index(True)]
                     if cloneStudentID != studentID:
-                         getStudentData()
-                         cloneStudentID=studentID
-                         if allowed=='No':
-                             print('Added to black list')
-                             fireDB.addToBlackList(studentID)
-                             blacklist = fireDB.getBlackList()
+                        getStudentData()
+                        cloneStudentID = studentID
+                        if allowed == 'No':
+                            print('Added to black list')
+                            fireDB.addToBlackList(studentID)
+                            blacklist = fireDB.getBlackList()
                 else:
                     studentID = 'unknown'
-                    studentName= 'unknown'
+                    studentName = 'unknown'
                     noDoses = 0
                     allowed = 'unknown'
-                
-                print('hi '+str(studentID))
+
+                print('hi ' + str(studentID))
                 cv2.putText(frame, studentID, (left, bottom + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
 
 
 @app.route('/')
@@ -136,15 +143,19 @@ def index():
 
 @app.route('/video_feed')
 def video_feed():
-    
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 
-@app.route('/userinfo',methods=['POST'])
-def userinfo():
 
-    return jsonify('',render_template('userinfo.html',ID=studentID,Name=studentName,NoDoses=noDoses,Allowed=allowed,blacklist=blacklist))
+@app.route('/userinfo', methods=['POST'])
+def userinfo():
+    return jsonify('',render_template('userinfo.html', ID=studentID, Name=studentName, NoDoses=noDoses, Allowed=allowed,))
+
+@app.route('/blacklist', methods=['POST'])
+def blacklist():
+
+    return jsonify('',render_template('blacklist.html',blacklist=blacklist))
 
 
 

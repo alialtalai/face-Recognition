@@ -6,25 +6,25 @@
     <title>df</title>
     <style>
         .video {
-            background-color: aqua;
-            /* width: 70%;
-            float: left; */
+<!--            background-color: aqua;-->
+<!--            width: 70%;-->
+            float: left;
             grid-row-start: 1;
             grid-row-end: 4;
         }
 
         .userinfo {
-            background-color: blue;
+<!--            background-color: blue;-->
 
         }
 
         .blacklist {
-            background-color: red;
+<!--            background-color: red;-->
 
         }
 
         .button {
-            background-color: yellow;
+<!--            background-color: yellow;-->
 
         }
 
@@ -99,12 +99,29 @@
                     dataType: "json",
                     success: function (data) {
                         $(userinfo).replaceWith(data)
+
                     }
                 });
             }
-
         });
 
+ $(function () {
+            window.setInterval(function () {
+                getData()
+            }, 1000)
+
+            function getData() {
+                $.ajax({
+                    url: "/blacklist",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        $(blacklist).replaceWith(data)
+
+                    }
+                });
+            }
+        });
     </script>
 
 </head>
@@ -121,7 +138,7 @@
         </div>
     </div> -->
 
-    <div class="containers">
+    <div class="containers" >
 
         <div class="video">
 
@@ -138,15 +155,15 @@
             <p><b>Allowed to enter: </b>{{Allowed}}</p>
         </div>
 
-        <div class="blacklist">
+        <div id="blacklist" class="blacklist">
             <h1>black list</h1>
             <nav>
                 <ul class="list">
-                    {%for doc in blacklist%}
+                    {%for doc in blacklist %}
                     <li>
                         <div class="card">
-                            <p>Name: <b>{{doc["name"]}} </b></p>
-                            <p>ID: <b>{{doc['stud_id]}}</b></p>
+                            <p>Name: <b>{{doc.name}} </b></p>
+                            <p>ID: <b>{{doc.id}}</b></p>
 
                         </div>
                     </li>
@@ -155,9 +172,7 @@
             </nav>
         </div>
 
-        <div class="button">
-            <h1>button</h1>
-        </div>
+
 
     </div>
 

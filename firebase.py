@@ -1,9 +1,19 @@
 import os
 import firebase_admin
+from beepy import beep
 from firebase_admin import credentials
 from firebase_admin import firestore
 import urllib.request
 from datetime import datetime
+
+class person:
+    def __init__(self, name, id,numberOfDoses):
+        self.name = name
+        self.id = id
+        self.numberOfDoses = numberOfDoses
+    def __iter__(self):
+        return iter(self.name,self.id,self.numberOfDoses)
+
 
 class firebase:
     def __init__(self):
@@ -50,13 +60,15 @@ class firebase:
               u'date':str(now)
          }
         db.collection(u'blacklist').document(stud_id).set(data)
+        beep(sound='ping')
     
     def getBlackList(self):
         list=[]
         db = firestore.client()
         docs = db.collection(u'blacklist').stream()
         for doc in docs:
-            list.append(doc.to_dict())
+            data = doc.to_dict()
+            list.append({'name':data['name'],'stud_id':data['stud_id'],'numberOfDoses':data['numberOfDoses']})
 
         return list
         
